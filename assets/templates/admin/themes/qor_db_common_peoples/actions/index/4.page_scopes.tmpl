@@ -1,0 +1,10 @@
+{{$res := .Resource}}
+{{$context := .Context}}
+{{$currentScope := (.Context.Data.Get "qor/db.common.peoples.scope")}}
+<div class="qor-actions mdl-layout__header qor-page-subnav__header">
+    <div class="mdl-layout__tab-bar mdl-layout__tab-bar-container">
+    {{range $scope := (($res.Data.GetInterface "qor/db.common.peoples.scopes").Scopes)}}
+        <a class="mdl-layout__tab{{if (eq $currentScope.Path $scope.Path)}} is-active{{end}}" href="{{$scope.URL $res $context}}">{{t $scope.TitleKey $scope.Title}}</a>
+    {{end}}
+    </div>
+</div>
