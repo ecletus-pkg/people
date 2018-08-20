@@ -7,11 +7,10 @@ import (
 	"github.com/aghape/admin/adminplugin"
 	"github.com/aghape/db"
 	"github.com/aghape/plug"
-	"github.com/moisespsena/go-edis"
 )
 
 type Plugin struct {
-	edis.EventDispatcher
+	plug.EventDispatcher
 	db.DBNames
 	adminplugin.AdminNames
 }
@@ -25,7 +24,7 @@ func (p *Plugin) OnRegister(e *plug.Options) {
 		InitResource(e.Admin)
 	})
 
-	db.DisNames(p).DBOnMigrateGorm(func(e *db.GormDBEvent) error {
+	db.Events(p).DBOnMigrateGorm(func(e *db.GormDBEvent) error {
 		return e.DB.AutoMigrate(&QorPeopleMedia{}, &QorPeople{}, &QorPeoplePhone{}, &QorPeopleAddress{},
 			&QorPeopleMail{}).Error
 	})
