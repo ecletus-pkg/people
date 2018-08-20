@@ -1,8 +1,8 @@
 package people
 
 import (
-	"github.com/aghape/admin"
 	"github.com/aghape/admin/tabs"
+	"github.com/aghape/admin"
 	"github.com/aghape/aghape"
 	"github.com/aghape/aghape/utils"
 	"github.com/moisespsena-go/aorm"
