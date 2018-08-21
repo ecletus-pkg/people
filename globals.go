@@ -36,7 +36,7 @@ var (
 )
 
 func init() {
-	group := I18N_GROUP + ".QorPeople"
+	group := I18N_GROUP + ".People"
 
 	for _, scope := range PeopleTabs {
 		scope.Path = utils.ToParamString(scope.Title)

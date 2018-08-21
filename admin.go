@@ -35,7 +35,7 @@ func AddSubResource(res *admin.Resource, value interface{}, config ...*Config) *
 	cfg := config[0]
 
 	r := res.NewResource(&admin.SubConfig{FieldName: cfg.FieldName}, value)
-	r.SetI18nModel(&QorPeople{})
+	r.SetI18nModel(&People{})
 	PrepareResource(r, cfg.Tabs)
 	res.SetMeta(&admin.Meta{Name: cfg.FieldName, Resource: r})
 	return r
@@ -46,9 +46,9 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 
 	tabs.PrepareResource(res, pageTabs, DefaultTab)
 	admincommon.RecordInfoFields(res)
-	phone.AddSubResource(res, &QorPeoplePhone{}, "OtherPhones")
-	mail.AddMailSubResource(res, &QorPeopleMail{}, "OtherMails")
-	address.AddSubResource(res, &QorPeopleAddress{}, "OtherAdresses")
+	phone.AddSubResource(res, &PeoplePhone{}, "OtherPhones")
+	mail.AddMailSubResource(res, &PeopleMail{}, "OtherMails")
+	address.AddSubResource(res, &PeopleAddress{}, "OtherAdresses")
 
 	addressResource := address.GetResource(Admin)
 	phoneResource := phone.GetResource(Admin)
@@ -58,6 +58,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 	res.SetMeta(&admin.Meta{Name: "Phone", Type: "single_edit", Resource: phoneResource})
 	res.SetMeta(&admin.Meta{Name: "Mobile", Type: "single_edit", Resource: phoneResource})
 	res.SetMeta(&admin.Meta{Name: "Mail", Type: "single_edit", Resource: mailResource})
+	res.SetMeta(&admin.Meta{Name: "Avatar", Config: &media_library.MediaBoxConfig{}, Type: "media_library_image"})
 
 	res.Filter(&admin.Filter{
 		Name:  "business",
@@ -92,7 +93,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 	res.SetMeta(&admin.Meta{Name: "AvatarDisplayURL", Valuer: func(i interface{}, context *qor.Context) interface{} {
 		avatar := res.GetDefinedMeta(admin.BASIC_META_ICON).Valuer(i, context).(string)
 		if avatar == "" {
-			avatar = context.GenGlobalStaticURL(i.(*QorPeople).AvatarURL())
+			avatar = context.GenGlobalStaticURL(i.(*People).AvatarURL())
 		}
 		return avatar
 	}})
@@ -197,7 +198,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 }
 
 func InitResource(Admin *admin.Admin) *admin.Resource {
-	return Admin.AddResource(&QorPeople{}, &admin.Config{
+	return Admin.AddResource(&People{}, &admin.Config{
 		Setup: func(res *admin.Resource) {
 			PrepareResource(res, PeopleTabs)
 		},
@@ -205,5 +206,5 @@ func InitResource(Admin *admin.Admin) *admin.Resource {
 }
 
 func GetResource(Admin *admin.Admin) *admin.Resource {
-	return Admin.GetResourceByID("QorPeople")
+	return Admin.GetResourceByID("People")
 }

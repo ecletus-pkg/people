@@ -30,10 +30,10 @@ const (
 )
 
 type PeopleGetter interface {
-	GetQorPeople() *QorPeople
+	GetQorPeople() *People
 }
 
-type QorPeople struct {
+type People struct {
 	common.Model
 	fragment.FragmentedModel
 	mixins.RecordInfoMixin
@@ -43,23 +43,23 @@ type QorPeople struct {
 	NationalIdentification string `gorm:"size:255"`
 	Male                   bool
 	Birthday               time.Time
-	Avatar                 media_library.MediaBox
+	Avatar                 media_library.MediaLibraryStorage `sql:"type:text" oss:"types:jpg;max-size:500K" media_library:"url:/system/{{class}}/{{primary_key}}/{{column}}.{{extension}}"`
 	PhoneID                string `gorm:"size:24"`
-	Phone                  phone.QorPhone
+	Phone                  phone.Phone
 	MobileID               string `gorm:"size:24"`
-	Mobile                 phone.QorPhone
-	OtherPhones            []QorPeoplePhone
+	Mobile                 phone.Phone
+	OtherPhones            []PeoplePhone
 	MailID                 string `gorm:"size:24"`
-	Mail                   mail.QorMail
-	OtherMails             []QorPeopleMail
+	Mail                   mail.Mail
+	OtherMails             []PeopleMail
 	MainAddressID          string `gorm:"size:24"`
-	MainAddress            address.QorAddress
-	OtherAdresses          []QorPeopleAddress
-	Media                  []QorPeopleMedia `gorm:"foreignkey:QorPeopleID"`
-	Notes                  string           `gorm:"type:text"`
+	MainAddress            address.Address
+	OtherAdresses          []PeopleAddress
+	Media                  []PeopleMedia `gorm:"foreignkey:PeopleID"`
+	Notes                  string        `gorm:"type:text"`
 }
 
-func (p *QorPeople) BasicLabel() string {
+func (p *People) BasicLabel() string {
 	s := p.FullName
 	if p.NickName != "" {
 		s += " (" + p.NickName + ")"
@@ -67,33 +67,33 @@ func (p *QorPeople) BasicLabel() string {
 	return s
 }
 
-func (p *QorPeople) BasicIcon() string {
+func (p *People) BasicIcon() string {
 	return ""
 }
 
-func (p *QorPeople) BasicID() string {
+func (p *People) BasicID() string {
 	return p.ID
 }
 
-func (p *QorPeople) Stringify() string {
+func (p *People) Stringify() string {
 	return p.FullName
 }
 
-func (p *QorPeople) IsBusiness() bool {
+func (p *People) IsBusiness() bool {
 	return p.Business
 }
 
-func (p *QorPeople) GetAvatar() *media_library.MediaBox {
+func (p *People) GetAvatar() *media_library.MediaLibraryStorage {
 	return &p.Avatar
 }
 
-func (p *QorPeople) AvatarURL(styles ...string) string {
+func (p *People) AvatarURL(styles ...string) string {
 	style := "main"
 	if len(styles) > 0 && styles[0] != "" {
 		style = styles[0]
 	}
 
-	if len(p.Avatar.Files) > 0 {
+	if p.Avatar.FileName != "" {
 		return p.Avatar.URL(style)
 	}
 
@@ -108,31 +108,31 @@ func (p *QorPeople) AvatarURL(styles ...string) string {
 	}
 }
 
-func (m *QorPeople) Clean(db *aorm.DB) {
+func (m *People) Clean(db *aorm.DB) {
 	utils.TrimStrings(&m.FullName, &m.NickName)
 }
 
-func (p *QorPeople) Validate(db *aorm.DB) {
+func (p *People) Validate(db *aorm.DB) {
 	if strings.TrimSpace(p.FullName) == "" {
 		db.AddError(validations.Failed(p, "FullName", "Full Name is empty."))
 	}
 }
 
-type QorPeoplePhone struct {
-	phone.QorPhone
-	QorPeopleID string `gorm:"size:24"`
+type PeoplePhone struct {
+	phone.Phone
+	PeopleID string `gorm:"size:24"`
 }
 
-type QorPeopleMail struct {
-	mail.QorMail
-	QorPeopleID string `gorm:"size:24"`
+type PeopleMail struct {
+	mail.Mail
+	PeopleID string `gorm:"size:24"`
 }
 
-type QorPeopleAddress struct {
-	address.QorAddress
-	QorPeopleID string `gorm:"size:24"`
+type PeopleAddress struct {
+	address.Address
+	PeopleID string `gorm:"size:24"`
 }
 
-func (pa *QorPeopleAddress) GetQorAddress() *address.QorAddress {
-	return &pa.QorAddress
+func (pa *PeopleAddress) GetAddress() *address.Address {
+	return &pa.Address
 }
