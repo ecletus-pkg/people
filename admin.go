@@ -10,9 +10,9 @@ import (
 	"github.com/aghape/admin/admincommon"
 	"github.com/aghape/admin/resource_callback"
 	"github.com/aghape/admin/tabs"
-	"github.com/aghape/aghape"
-	"github.com/aghape/aghape/resource"
-	"github.com/aghape/aghape/utils"
+	"github.com/aghape/core"
+	"github.com/aghape/core/resource"
+	"github.com/aghape/core/utils"
 	"github.com/aghape/db/common"
 	"github.com/aghape/media"
 	"github.com/aghape/media/media_library"
@@ -63,7 +63,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 	res.Filter(&admin.Filter{
 		Name:  "business",
 		Label: "Business/Individual",
-		Available: func(context *qor.Context) bool {
+		Available: func(context *core.Context) bool {
 			return tabs.GetTabPath(context) == ""
 		},
 		Config: &admin.SelectOneConfig{
@@ -77,7 +77,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 			return db.Where("business")
 		}})
 
-	res.Layouts["basic"].Prepare = func(r resource.Resourcer, context *qor.Context) {
+	res.Layouts["basic"].Prepare = func(r resource.Resourcer, context *core.Context) {
 		context.DB = context.DB.Select("id, full_name, nick_name")
 	}
 
@@ -90,7 +90,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 	})
 	mediaResource.IndexAttrs("File", "Title")
 
-	res.SetMeta(&admin.Meta{Name: "AvatarDisplayURL", Valuer: func(i interface{}, context *qor.Context) interface{} {
+	res.SetMeta(&admin.Meta{Name: "AvatarDisplayURL", Valuer: func(i interface{}, context *core.Context) interface{} {
 		avatar := res.GetDefinedMeta(admin.BASIC_META_ICON).Valuer(i, context).(string)
 		if avatar == "" {
 			avatar = context.GenGlobalStaticURL(i.(*People).AvatarURL())
@@ -98,7 +98,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 		return avatar
 	}})
 
-	res.Meta(&admin.Meta{Name: "AvatarImageTag", Label: "Avatar", Valuer: func(record interface{}, context *qor.Context) interface{} {
+	res.Meta(&admin.Meta{Name: "AvatarImageTag", Label: "Avatar", Valuer: func(record interface{}, context *core.Context) interface{} {
 		if record != nil {
 			uri := res.GetDefinedMeta("AvatarDisplayURL").Valuer(record, context).(string)
 			tag, err := ImageTag.ExecuteString(uri)
@@ -128,7 +128,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 		}})
 
 	res.Meta(&admin.Meta{Name: "Notes", Config: &admin.RichEditorConfig{}})
-	res.Meta(&admin.Meta{Name: "Stringify", Valuer: func(v interface{}, context *qor.Context) interface{} {
+	res.Meta(&admin.Meta{Name: "Stringify", Valuer: func(v interface{}, context *core.Context) interface{} {
 		return fmt.Sprint(v)
 	}})
 
@@ -158,7 +158,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 		"Notes",
 	)
 
-	res.Meta(&admin.Meta{Name: "DisplayTupleID", EncodedName: "ID", Valuer: func(instance interface{}, context *qor.Context) interface{} {
+	res.Meta(&admin.Meta{Name: "DisplayTupleID", EncodedName: "ID", Valuer: func(instance interface{}, context *core.Context) interface{} {
 		return instance.(common.WithID).GetID()
 	}})
 

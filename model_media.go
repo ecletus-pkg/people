@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/aghape/aghape"
-	"github.com/aghape/aghape/db"
+	"github.com/aghape/core"
+	"github.com/aghape/core/db"
 	"github.com/aghape/media/media_library"
 	"github.com/aghape/validations"
 	"github.com/moisespsena-go/aorm"
@@ -19,7 +19,7 @@ type PeopleMedia struct {
 	File         media_library.MediaLibraryStorage `gorm:"type:text" media_library:"url:/system/{{class}}/{{primary_key}}/{{column}}.{{extension}}"`
 }
 
-func (i *PeopleMedia) Init(site qor.SiteInterface) {
+func (i *PeopleMedia) Init(site core.SiteInterface) {
 	i.File.Init(site, db.FieldCache.Get(i, "File"))
 }
 
