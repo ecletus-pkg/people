@@ -8,7 +8,6 @@ import (
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
 	"github.com/aghape/db/common"
-	"github.com/aghape/db/common/mixins"
 	"github.com/aghape/db/common/utils"
 	"github.com/aghape/fragment"
 	"github.com/aghape/media/media_library"
@@ -34,9 +33,8 @@ type PeopleGetter interface {
 }
 
 type People struct {
-	common.Model
+	aorm.SoftDeleteAuditedModel
 	fragment.FragmentedModel
-	mixins.RecordInfoMixin
 	FullName               string `gorm:"size:255"`
 	NickName               string `gorm:"size:255"`
 	Business               bool
@@ -44,7 +42,7 @@ type People struct {
 	Male                   bool
 	Birthday               time.Time
 	Avatar                 media_library.MediaLibraryStorage `sql:"type:text" oss:"types:jpg;max-size:500K" media_library:"url:/system/{{class}}/{{primary_key}}/{{column}}.{{extension}}"`
-	PhoneID                string `gorm:"size:24"`
+	PhoneID                string                            `gorm:"size:24"`
 	Phone                  phone.Phone
 	MobileID               string `gorm:"size:24"`
 	Mobile                 phone.Phone
