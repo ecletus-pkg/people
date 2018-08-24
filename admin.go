@@ -9,7 +9,7 @@ import (
 	"github.com/aghape/admin"
 	"github.com/aghape/admin/admincommon"
 	"github.com/aghape/admin/resource_callback"
-	"github.com/aghape/admin/tabs"
+	"github.com/aghape-pkg/admin-tabs"
 	"github.com/aghape/core"
 	"github.com/aghape/core/resource"
 	"github.com/aghape/core/utils"
@@ -22,7 +22,7 @@ import (
 
 type Config struct {
 	FieldName string
-	Tabs      tabs.Tabs
+	Tabs      admin_tabs.Tabs
 }
 
 var PeopleCallbacks = resource_callback.NewCallbacksStack()
@@ -41,10 +41,10 @@ func AddSubResource(res *admin.Resource, value interface{}, config ...*Config) *
 	return r
 }
 
-func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
+func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 	Admin := res.GetAdmin()
 
-	tabs.PrepareResource(res, pageTabs, DefaultTab)
+	admin_tabs.PrepareResource(res, pageTabs, DefaultTab)
 	admincommon.RecordInfoFields(res)
 	phone.AddSubResource(res, &PeoplePhone{}, "OtherPhones")
 	mail.AddMailSubResource(res, &PeopleMail{}, "OtherMails")
@@ -64,7 +64,7 @@ func PrepareResource(res *admin.Resource, pageTabs tabs.Tabs) {
 		Name:  "business",
 		Label: "Business/Individual",
 		Available: func(context *core.Context) bool {
-			return tabs.GetTabPath(context) == ""
+			return admin_tabs.GetTabPath(context) == ""
 		},
 		Config: &admin.SelectOneConfig{
 			Collection: utils.TuplesIndex("Individual", "Business"),

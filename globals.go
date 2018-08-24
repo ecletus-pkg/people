@@ -1,7 +1,7 @@
 package people
 
 import (
-	"github.com/aghape/admin/tabs"
+	"github.com/aghape-pkg/admin-tabs"
 	"github.com/aghape/admin"
 	"github.com/aghape/core"
 	"github.com/aghape/core/utils"
@@ -11,7 +11,7 @@ import (
 	"github.com/moisespsena/template/html/template"
 )
 
-var DefaultTab = &tabs.Tab{
+var DefaultTab = &admin_tabs.Tab{
 	Default: true,
 	Title:   "All",
 	Handler: func(res *admin.Resource, context *core.Context, db *aorm.DB) *aorm.DB {
@@ -20,7 +20,7 @@ var DefaultTab = &tabs.Tab{
 }
 
 var ImageTag, _ = template.New("qor:db:common.people.tag.image").Parse("<img src=\"{{.}}\"></img>")
-var PeopleTabs = []*tabs.Tab{
+var PeopleTabs = []*admin_tabs.Tab{
 	DefaultTab,
 	{"Individual", "", "", func(res *admin.Resource, context *core.Context, db *aorm.DB) *aorm.DB {
 		return db
