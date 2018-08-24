@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/aghape-pkg/address"
+	"github.com/aghape-pkg/admin-tabs"
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
 	"github.com/aghape/admin"
 	"github.com/aghape/admin/admincommon"
 	"github.com/aghape/admin/resource_callback"
-	"github.com/aghape-pkg/admin-tabs"
 	"github.com/aghape/core"
 	"github.com/aghape/core/resource"
 	"github.com/aghape/core/utils"
@@ -77,8 +77,9 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 			return db.Where("business")
 		}})
 
-	res.Layouts["basic"].PrepareFunc = func(r resource.Resourcer, context *core.Context) {
-		context.DB = context.DB.Select("id, full_name, nick_name")
+	res.GetLayout(resource.BASIC_LAYOUT).(*resource.Layout).PrepareFunc = func(crud *resource.CRUD) *resource.CRUD {
+		crud.Context().DB = crud.Context().DB.Select("id, full_name, nick_name")
+		return crud
 	}
 
 	mediaResource := res.AddResource(&admin.SubConfig{FieldName: "Media"}, nil, &admin.Config{Priority: -1})
