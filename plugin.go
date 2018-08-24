@@ -4,7 +4,7 @@ import (
 	"github.com/aghape-pkg/address"
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
-	"github.com/aghape/admin/adminplugin"
+	"github.com/aghape-pkg/admin"
 	"github.com/aghape/db"
 	"github.com/aghape/plug"
 )
@@ -12,7 +12,7 @@ import (
 type Plugin struct {
 	plug.EventDispatcher
 	db.DBNames
-	adminplugin.AdminNames
+	admin_plugin.AdminNames
 }
 
 func (Plugin) After() []interface{} {
@@ -20,7 +20,7 @@ func (Plugin) After() []interface{} {
 }
 
 func (p *Plugin) OnRegister(e *plug.Options) {
-	p.AdminNames.OnInitResources(p, func(e *adminplugin.AdminEvent) {
+	admin_plugin.Events(p).InitResources(func(e *admin_plugin.AdminEvent) {
 		InitResource(e.Admin)
 	})
 
