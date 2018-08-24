@@ -77,7 +77,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 			return db.Where("business")
 		}})
 
-	res.Layouts["basic"].Prepare = func(r resource.Resourcer, context *core.Context) {
+	res.Layouts["basic"].PrepareFunc = func(r resource.Resourcer, context *core.Context) {
 		context.DB = context.DB.Select("id, full_name, nick_name")
 	}
 
