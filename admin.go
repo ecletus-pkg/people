@@ -77,7 +77,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 			return db.Where("business")
 		}})
 
-	res.GetLayout(resource.BASIC_LAYOUT).(*resource.Layout).PrepareFunc = func(crud *resource.CRUD) *resource.CRUD {
+	res.GetAdminLayout(resource.BASIC_LAYOUT).PrepareFunc = func(crud *resource.CRUD) *resource.CRUD {
 		crud.Context().DB = crud.Context().DB.Select("id, full_name, nick_name")
 		return crud
 	}
@@ -115,7 +115,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 		Name: "Avatar",
 		Enabled: func(record interface{}, context *admin.Context, meta *admin.Meta) bool {
 			if context.Action == "show" {
-				return len(record.(PeopleInterface).GetAvatar().Files) > 0
+				return record.(*People).GetAvatar().FileSize > 0
 			}
 
 			return true
@@ -171,7 +171,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 		if record == nil {
 			return false
 		}
-		r := record.(PeopleInterface)
+		r := record.(*People)
 		return r.GetID() != "" && !r.IsBusiness()
 	}})
 
@@ -179,7 +179,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 		if record == nil {
 			return false
 		}
-		r := record.(PeopleInterface)
+		r := record.(*People)
 		return r.GetID() != "" && !r.IsBusiness()
 	}})
 
@@ -189,11 +189,6 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 	res.SearchAttrs("FullName", "NickName")
 	res.CustomAttrs("display.tuple", "DisplayTupleID", "Stringify")
 	//res.MetaAliases
-
-	for _, f := range res.FakeScope.Fields() {
-		fieldName := f.Name
-		res.GetMeta(fieldName).I18nPrefix = I18N_GROUP
-	}
 
 	PeopleCallbacks.Run(res)
 }

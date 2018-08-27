@@ -1,4 +1,7 @@
-QorPeople:
+People:
+  label*:
+    p: Pessoas
+    s: Pessoa
   scopes:
     All: Tudo
     Individual: P. Física

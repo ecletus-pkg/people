@@ -7,20 +7,12 @@ import (
 	"github.com/aghape-pkg/address"
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
-	"github.com/aghape/db/common"
 	"github.com/aghape/db/common/utils"
 	"github.com/aghape/fragment"
 	"github.com/aghape/media/media_library"
 	"github.com/aghape/validations"
 	"github.com/moisespsena-go/aorm"
 )
-
-type PeopleInterface interface {
-	common.WithID
-	AvatarURL(styles ...string) string
-	GetAvatar() *media_library.MediaBox
-	IsBusiness() bool
-}
 
 const (
 	ICON_BUSINESS = "/images/icon-manufacturer.png"
