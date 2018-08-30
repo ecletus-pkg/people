@@ -2,7 +2,6 @@ People:
   label*:
     p: Pessoas
     s: Pessoa
-  scopes:
-    All: Tudo
+  schemes:
     Individual: P. Física
     Business: P. Jurídica

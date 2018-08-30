@@ -49,6 +49,10 @@ type People struct {
 	Notes                  string        `gorm:"type:text"`
 }
 
+func (People) GetGormInlinePreloadFields() []string {
+	return []string{"FullName"}
+}
+
 func (p *People) BasicLabel() string {
 	s := p.FullName
 	if p.NickName != "" {

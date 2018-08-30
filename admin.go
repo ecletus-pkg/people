@@ -20,31 +20,24 @@ import (
 	"github.com/moisespsena/template/html/template"
 )
 
+const (
+	SCHEME_INDIVIDUAL = "Individual"
+	SCHEME_BUSINESS   = "Business"
+)
+
+var DEFAULT_SCHEMES_CATEGORIES = []string{admin_tabs.SCHEME_CATEGORY}
+
 type Config struct {
 	FieldName string
-	Tabs      admin_tabs.Tabs
+	Tabs      []*admin_tabs.Tab
 }
 
 var PeopleCallbacks = resource_callback.NewCallbacksStack()
 
-func AddSubResource(res *admin.Resource, value interface{}, config ...*Config) *admin.Resource {
-	if len(config) == 0 {
-		config = []*Config{{}}
-	}
-
-	cfg := config[0]
-
-	r := res.NewResource(&admin.SubConfig{FieldName: cfg.FieldName}, value)
-	r.SetI18nModel(&People{})
-	PrepareResource(r, cfg.Tabs)
-	res.SetMeta(&admin.Meta{Name: cfg.FieldName, Resource: r})
-	return r
-}
-
-func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
+func PrepareResource(res *admin.Resource) {
 	Admin := res.GetAdmin()
 
-	admin_tabs.PrepareResource(res, pageTabs, DefaultTab)
+	//admin_tabs.PrepareResource(res, pageTabs, DefaultTab)
 	admincommon.RecordInfoFields(res)
 	phone.AddSubResource(res, &PeoplePhone{}, "OtherPhones")
 	mail.AddMailSubResource(res, &PeopleMail{}, "OtherMails")
@@ -53,6 +46,21 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 	addressResource := address.GetResource(Admin)
 	phoneResource := phone.GetResource(Admin)
 	mailResource := mail.GetResource(Admin)
+
+	res.RegisterScheme(SCHEME_INDIVIDUAL, func(s *admin.Scheme) {
+		s.Categories = DEFAULT_SCHEMES_CATEGORIES
+		s.NotMount = true
+		s.DefaultFilter(func(context *core.Context, db *aorm.DB) *aorm.DB {
+			return db.Where("NOT peoples.business")
+		})
+	})
+	res.RegisterScheme(SCHEME_BUSINESS, func(s *admin.Scheme) {
+		s.Categories = DEFAULT_SCHEMES_CATEGORIES
+		s.NotMount = true
+		s.DefaultFilter(func(context *core.Context, db *aorm.DB) *aorm.DB {
+			return db.Where("peoples.business")
+		})
+	})
 
 	res.SetMeta(&admin.Meta{Name: "MainAddress", Type: "single_edit", Resource: addressResource})
 	res.SetMeta(&admin.Meta{Name: "Phone", Type: "single_edit", Resource: phoneResource})
@@ -77,11 +85,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 			return db.Where("business")
 		}})
 
-	res.GetAdminLayout(resource.BASIC_LAYOUT).PrepareFunc = func(crud *resource.CRUD) *resource.CRUD {
-		crud.Context().DB = crud.Context().DB.Select("id, full_name, nick_name")
-		return crud
-	}
-
+	res.GetAdminLayout(resource.BASIC_LAYOUT).Select("id, full_name, nick_name")
 	mediaResource := res.AddResource(&admin.SubConfig{FieldName: "Media"}, nil, &admin.Config{Priority: -1})
 	mediaResource.Filter(&admin.Filter{
 		Name:       "SelectedType",
@@ -196,7 +200,7 @@ func PrepareResource(res *admin.Resource, pageTabs admin_tabs.Tabs) {
 func InitResource(Admin *admin.Admin) *admin.Resource {
 	return Admin.AddResource(&People{}, &admin.Config{
 		Setup: func(res *admin.Resource) {
-			PrepareResource(res, PeopleTabs)
+			PrepareResource(res)
 		},
 	})
 }
