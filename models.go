@@ -7,6 +7,7 @@ import (
 	"github.com/aghape-pkg/address"
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
+	"github.com/aghape/core"
 	"github.com/aghape/db/common/utils"
 	"github.com/aghape/fragment"
 	"github.com/aghape/media/media_library"
@@ -53,7 +54,7 @@ func (People) GetGormInlinePreloadFields() []string {
 	return []string{"FullName"}
 }
 
-func (p *People) BasicLabel() string {
+func (p *People) String() string {
 	s := p.FullName
 	if p.NickName != "" {
 		s += " (" + p.NickName + ")"
@@ -61,12 +62,11 @@ func (p *People) BasicLabel() string {
 	return s
 }
 
-func (p *People) BasicIcon() string {
-	return ""
-}
-
-func (p *People) BasicID() string {
-	return p.ID
+func (p *People) GetIcon(ctx *core.Context) string {
+	if iconStyle := ctx.URLParam("icon_style"); iconStyle != "" {
+		return p.AvatarURL(iconStyle)
+	}
+	return p.AvatarURL()
 }
 
 func (p *People) Stringify() string {

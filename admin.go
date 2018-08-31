@@ -85,7 +85,7 @@ func PrepareResource(res *admin.Resource) {
 			return db.Where("business")
 		}})
 
-	res.GetAdminLayout(resource.BASIC_LAYOUT).Select("id, full_name, nick_name")
+	res.GetAdminLayout(resource.BASIC_LAYOUT).Select(aorm.IQ("{}.id, {}.full_name, {}.nick_name"))
 	mediaResource := res.AddResource(&admin.SubConfig{FieldName: "Media"}, nil, &admin.Config{Priority: -1})
 	mediaResource.Filter(&admin.Filter{
 		Name:       "SelectedType",
