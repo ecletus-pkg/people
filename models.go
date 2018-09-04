@@ -4,13 +4,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aghape/media/oss"
+
 	"github.com/aghape-pkg/address"
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
-	"github.com/aghape/core"
 	"github.com/aghape/db/common/utils"
 	"github.com/aghape/fragment"
-	"github.com/aghape/media/media_library"
 	"github.com/aghape/validations"
 	"github.com/moisespsena-go/aorm"
 )
@@ -34,8 +34,8 @@ type People struct {
 	NationalIdentification string `gorm:"size:255"`
 	Male                   bool
 	Birthday               time.Time
-	Avatar                 media_library.MediaLibraryStorage `sql:"type:text" oss:"types:jpg;max-size:500K" media_library:"url:/system/{{class}}/{{primary_key}}/{{column}}.{{extension}}"`
-	PhoneID                string                            `gorm:"size:24"`
+	Avatar                 oss.Image `sql:"type:text"`
+	PhoneID                string    `gorm:"size:24"`
 	Phone                  phone.Phone
 	MobileID               string `gorm:"size:24"`
 	Mobile                 phone.Phone
@@ -62,44 +62,12 @@ func (p *People) String() string {
 	return s
 }
 
-func (p *People) GetIcon(ctx *core.Context) string {
-	if iconStyle := ctx.URLParam("icon_style"); iconStyle != "" {
-		return p.AvatarURL(iconStyle)
-	}
-	return p.AvatarURL()
-}
-
 func (p *People) Stringify() string {
 	return p.FullName
 }
 
 func (p *People) IsBusiness() bool {
 	return p.Business
-}
-
-func (p *People) GetAvatar() *media_library.MediaLibraryStorage {
-	return &p.Avatar
-}
-
-func (p *People) AvatarURL(styles ...string) string {
-	style := "main"
-	if len(styles) > 0 && styles[0] != "" {
-		style = styles[0]
-	}
-
-	if p.Avatar.FileName != "" {
-		return p.Avatar.URL(style)
-	}
-
-	if p.Business {
-		return ICON_BUSINESS
-	}
-
-	if p.Male {
-		return ICON_MEN
-	} else {
-		return ICON_WOMAN
-	}
 }
 
 func (m *People) Clean(db *aorm.DB) {

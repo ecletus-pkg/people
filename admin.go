@@ -3,6 +3,8 @@ package people
 import (
 	"fmt"
 
+	"github.com/aghape/media/oss"
+
 	"github.com/aghape-pkg/address"
 	"github.com/aghape-pkg/admin-tabs"
 	"github.com/aghape-pkg/mail"
@@ -12,12 +14,10 @@ import (
 	"github.com/aghape/admin/resource_callback"
 	"github.com/aghape/core"
 	"github.com/aghape/core/resource"
-	"github.com/aghape/core/utils"
 	"github.com/aghape/db/common"
 	"github.com/aghape/media"
 	"github.com/aghape/media/media_library"
 	"github.com/moisespsena-go/aorm"
-	"github.com/moisespsena/template/html/template"
 )
 
 const (
@@ -47,43 +47,30 @@ func PrepareResource(res *admin.Resource) {
 	phoneResource := phone.GetResource(Admin)
 	mailResource := mail.GetResource(Admin)
 
-	res.RegisterScheme(SCHEME_INDIVIDUAL, func(s *admin.Scheme) {
-		s.Categories = DEFAULT_SCHEMES_CATEGORIES
-		s.NotMount = true
-		s.DefaultFilter(func(context *core.Context, db *aorm.DB) *aorm.DB {
-			return db.Where("NOT peoples.business")
-		})
+	res.RegisterScheme(SCHEME_INDIVIDUAL, &admin.SchemeConfig{
+		Visible: true,
+		Setup: func(s *admin.Scheme) {
+			s.Categories = DEFAULT_SCHEMES_CATEGORIES
+			s.DefaultFilter(func(context *core.Context, db *aorm.DB) *aorm.DB {
+				return db.Where("NOT peoples.business")
+			})
+		},
 	})
-	res.RegisterScheme(SCHEME_BUSINESS, func(s *admin.Scheme) {
-		s.Categories = DEFAULT_SCHEMES_CATEGORIES
-		s.NotMount = true
-		s.DefaultFilter(func(context *core.Context, db *aorm.DB) *aorm.DB {
-			return db.Where("peoples.business")
-		})
+	res.RegisterScheme(SCHEME_BUSINESS, &admin.SchemeConfig{
+		Visible: true,
+		Setup: func(s *admin.Scheme) {
+			s.Categories = DEFAULT_SCHEMES_CATEGORIES
+			s.DefaultFilter(func(context *core.Context, db *aorm.DB) *aorm.DB {
+				return db.Where("peoples.business")
+			})
+		},
 	})
 
 	res.SetMeta(&admin.Meta{Name: "MainAddress", Type: "single_edit", Resource: addressResource})
 	res.SetMeta(&admin.Meta{Name: "Phone", Type: "single_edit", Resource: phoneResource})
 	res.SetMeta(&admin.Meta{Name: "Mobile", Type: "single_edit", Resource: phoneResource})
 	res.SetMeta(&admin.Meta{Name: "Mail", Type: "single_edit", Resource: mailResource})
-	res.SetMeta(&admin.Meta{Name: "Avatar", Config: &media_library.MediaBoxConfig{}, Type: "media_library_image"})
-
-	res.Filter(&admin.Filter{
-		Name:  "business",
-		Label: "Business/Individual",
-		Available: func(context *core.Context) bool {
-			return admin_tabs.GetTabPath(context) == ""
-		},
-		Config: &admin.SelectOneConfig{
-			Collection: utils.TuplesIndex("Individual", "Business"),
-		},
-		Handler: func(db *aorm.DB, argument *admin.FilterArgument) *aorm.DB {
-			v := argument.Value.Get("Value").Value.([]string)[0]
-			if v == "0" {
-				return db.Where("NOT business")
-			}
-			return db.Where("business")
-		}})
+	res.SetMeta(&admin.Meta{Name: "Avatar", Config: &media_library.MediaBoxConfig{}, Type: "image"})
 
 	res.GetAdminLayout(resource.BASIC_LAYOUT).Select(aorm.IQ("{}.id, {}.full_name, {}.nick_name"))
 	mediaResource := res.AddResource(&admin.SubConfig{FieldName: "Media"}, nil, &admin.Config{Priority: -1})
@@ -95,31 +82,11 @@ func PrepareResource(res *admin.Resource) {
 	})
 	mediaResource.IndexAttrs("File", "Title")
 
-	res.SetMeta(&admin.Meta{Name: "AvatarDisplayURL", Valuer: func(i interface{}, context *core.Context) interface{} {
-		avatar := res.GetDefinedMeta(admin.BASIC_META_ICON).Valuer(i, context).(string)
-		if avatar == "" {
-			avatar = context.GenGlobalStaticURL(i.(*People).AvatarURL())
-		}
-		return avatar
-	}})
-
-	res.Meta(&admin.Meta{Name: "AvatarImageTag", Label: "Avatar", Valuer: func(record interface{}, context *core.Context) interface{} {
-		if record != nil {
-			uri := res.GetDefinedMeta("AvatarDisplayURL").Valuer(record, context).(string)
-			tag, err := ImageTag.ExecuteString(uri)
-			if err != nil {
-				context.AddError(err)
-			}
-			return template.HTML(tag)
-		}
-		return ""
-	}})
-
-	res.SetMeta(&admin.Meta{
+	avatar := res.SetMeta(&admin.Meta{
 		Name: "Avatar",
 		Enabled: func(record interface{}, context *admin.Context, meta *admin.Meta) bool {
 			if context.Action == "show" {
-				return record.(*People).GetAvatar().FileSize > 0
+				return record.(*People).Avatar.FileSize > 0
 			}
 
 			return true
@@ -131,6 +98,25 @@ func PrepareResource(res *admin.Resource) {
 				"main": {Width: 560, Height: 700},
 			},
 		}})
+
+	oss.ImageMetaOnDefaultValue(avatar, func(e *admin.MetaValueEvent) {
+		if e.Recorde == nil {
+			return
+		}
+
+		p := e.Recorde.(*People)
+
+		if p.Business {
+			e.Value = ICON_BUSINESS
+		}
+		if p.Male {
+			e.Value = ICON_MEN
+		} else {
+			e.Value = ICON_WOMAN
+		}
+	})
+
+	oss.ImageMetaURL(avatar, "Preview", oss.IMAGE_STYLE_PREVIEW).Label = "Avatar"
 
 	res.Meta(&admin.Meta{Name: "Notes", Config: &admin.RichEditorConfig{}})
 	res.Meta(&admin.Meta{Name: "Stringify", Valuer: func(v interface{}, context *core.Context) interface{} {
@@ -187,7 +173,7 @@ func PrepareResource(res *admin.Resource) {
 		return r.GetID() != "" && !r.IsBusiness()
 	}})
 
-	res.IndexAttrs("AvatarImageTag", "NickName", "FullName")
+	res.IndexAttrs("AvatarPreview", "FullName", "NickName")
 	res.EditAttrs("ID", res.ShowAttrs())
 	res.NewAttrs("FullName", "NickName", "Business")
 	res.SearchAttrs("FullName", "NickName")
