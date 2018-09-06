@@ -51,7 +51,7 @@ type People struct {
 }
 
 func (People) GetGormInlinePreloadFields() []string {
-	return []string{"FullName"}
+	return []string{"FullName", "MainAddress"}
 }
 
 func (p *People) String() string {
