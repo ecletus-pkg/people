@@ -26,15 +26,15 @@ type PeopleGetter interface {
 }
 
 type People struct {
-	aorm.SoftDeleteAuditedModel
+	aorm.AuditedSDModel
 	fragment.FragmentedModel
 	FullName               string `gorm:"size:255"`
 	NickName               string `gorm:"size:255"`
 	Business               bool
 	NationalIdentification string `gorm:"size:255"`
-	Male                   bool
+	Male                   *bool
 	Birthday               time.Time
-	Avatar                 oss.Image `sql:"type:text"`
+	Avatar                 oss.Image `sql:"type:text" image:"crop:false"`
 	PhoneID                string    `gorm:"size:24"`
 	Phone                  phone.Phone
 	MobileID               string `gorm:"size:24"`

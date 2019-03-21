@@ -16,7 +16,7 @@ type PeopleMedia struct {
 	PeopleID     string `gorm:"size:24"`
 	Title        string
 	SelectedType string
-	File         media_library.MediaLibraryStorage `gorm:"type:text" media_library:"url:/system/{{class}}/{{primary_key}}/{{column}}.{{extension}}"`
+	File         media_library.MediaLibraryStorage
 }
 
 func (i *PeopleMedia) Init(site core.SiteInterface) {
@@ -45,11 +45,11 @@ func (i *PeopleMedia) ScanMediaOptions(mediaOption media_library.MediaOption) er
 	}
 }
 
-func (i *PeopleMedia) GetMediaOption() (mediaOption media_library.MediaOption) {
+func (i *PeopleMedia) GetMediaOption(ctx *core.Context) (mediaOption media_library.MediaOption) {
 	mediaOption.Video = i.File.Video
 	mediaOption.FileName = i.File.FileName
-	mediaOption.URL = i.File.FullURL()
-	mediaOption.OriginalURL = i.File.FullURL("original")
+	mediaOption.URL = i.File.FullURL(ctx)
+	mediaOption.OriginalURL = i.File.FullURL(ctx,"original")
 	mediaOption.CropOptions = i.File.CropOptions
 	mediaOption.Sizes = i.File.GetSizes()
 	mediaOption.Description = i.File.Description

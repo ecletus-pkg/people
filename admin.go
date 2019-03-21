@@ -3,6 +3,8 @@ package people
 import (
 	"fmt"
 
+	"github.com/aghape/admin/admin_helpers"
+
 	"github.com/aghape/media/oss"
 
 	"github.com/aghape-pkg/address"
@@ -10,12 +12,9 @@ import (
 	"github.com/aghape-pkg/mail"
 	"github.com/aghape-pkg/phone"
 	"github.com/aghape/admin"
-	"github.com/aghape/admin/admincommon"
 	"github.com/aghape/admin/resource_callback"
 	"github.com/aghape/core"
-	"github.com/aghape/core/resource"
 	"github.com/aghape/db/common"
-	"github.com/aghape/media"
 	"github.com/aghape/media/media_library"
 	"github.com/moisespsena-go/aorm"
 )
@@ -38,7 +37,6 @@ func PrepareResource(res *admin.Resource) {
 	Admin := res.GetAdmin()
 
 	//admin_tabs.PrepareResource(res, pageTabs, DefaultTab)
-	admincommon.RecordInfoFields(res)
 	phone.AddSubResource(res, &PeoplePhone{}, "OtherPhones")
 	mail.AddMailSubResource(res, &PeopleMail{}, "OtherMails")
 	address.AddSubResource(res, &PeopleAddress{}, "OtherAdresses")
@@ -66,21 +64,23 @@ func PrepareResource(res *admin.Resource) {
 		},
 	})
 
-	res.SetMeta(&admin.Meta{Name: "MainAddress", Type: "single_edit", Resource: addressResource})
-	res.SetMeta(&admin.Meta{Name: "Phone", Type: "single_edit", Resource: phoneResource})
-	res.SetMeta(&admin.Meta{Name: "Mobile", Type: "single_edit", Resource: phoneResource})
-	res.SetMeta(&admin.Meta{Name: "Mail", Type: "single_edit", Resource: mailResource})
+	res.Meta(&admin.Meta{Name: "Male", Enabled: func(recorde interface{}, context *admin.Context, meta *admin.Meta) bool {
+		if context.Type.Has(admin.SHOW) {
+			return recorde.(*People).Male != nil
+		}
+		return true
+	}})
+
+	admin_helpers.SingleEditPairs(res,
+		"MainAddress", addressResource,
+		"Phone", phoneResource,
+		"Mobile", phoneResource,
+		"Mail", mailResource,
+	)
+	
 	res.SetMeta(&admin.Meta{Name: "Avatar", Config: &media_library.MediaBoxConfig{}, Type: "image"})
 
-	res.GetAdminLayout(resource.BASIC_LAYOUT).Select(aorm.IQ("{}.id, {}.full_name, {}.nick_name"))
-	mediaResource := res.AddResource(&admin.SubConfig{FieldName: "Media"}, nil, &admin.Config{Priority: -1})
-	mediaResource.Filter(&admin.Filter{
-		Name:       "SelectedType",
-		Label:      "Media Type",
-		Operations: []string{"contains"},
-		Config:     &admin.SelectOneConfig{Collection: [][]string{{"video", "Video"}, {"image", "Image"}, {"file", "File"}, {"video_link", "Video Link"}}},
-	})
-	mediaResource.IndexAttrs("File", "Title")
+	res.BasicLayout().Select(aorm.IQ("{}.id, {}.full_name, {}.nick_name, {}.male, {}.avatar, {}.business"))
 
 	avatar := res.SetMeta(&admin.Meta{
 		Name: "Avatar",
@@ -90,16 +90,9 @@ func PrepareResource(res *admin.Resource) {
 			}
 
 			return true
-		},
-		Config: &media_library.MediaBoxConfig{
-			RemoteDataResource: admin.NewDataResource(mediaResource),
-			Max:                1,
-			Sizes: map[string]*media.Size{
-				"main": {Width: 560, Height: 700},
-			},
 		}})
 
-	oss.ImageMetaOnDefaultValue(avatar, func(e *admin.MetaValueEvent) {
+	oss.ImageMetaOnDefaultValue(avatar, func(e *admin.MetaValuerEvent) {
 		if e.Recorde == nil {
 			return
 		}
@@ -108,17 +101,23 @@ func PrepareResource(res *admin.Resource) {
 
 		if p.Business {
 			e.Value = ICON_BUSINESS
+			return
 		}
-		if p.Male {
-			e.Value = ICON_MEN
-		} else {
-			e.Value = ICON_WOMAN
+		if p.Male != nil {
+			if *p.Male {
+				e.Value = ICON_MEN
+			} else {
+				e.Value = ICON_WOMAN
+			}
 		}
 	})
 
-	oss.ImageMetaURL(avatar, "Preview", oss.IMAGE_STYLE_PREVIEW).Label = "Avatar"
+	avatarURL := oss.ImageMetaURL(avatar, "Preview", oss.IMAGE_STYLE_PREVIEW)
+	avatarURL.Label = "Avatar"
+	res.GetMeta(admin.BASIC_META_ICON).SetValuer(avatarURL.Valuer)
 
-	res.Meta(&admin.Meta{Name: "Notes", Config: &admin.RichEditorConfig{}})
+	admin_helpers.FieldRichEditor(res, "Notes")
+
 	res.Meta(&admin.Meta{Name: "Stringify", Valuer: func(v interface{}, context *core.Context) interface{} {
 		return fmt.Sprint(v)
 	}})
@@ -173,12 +172,14 @@ func PrepareResource(res *admin.Resource) {
 		return r.GetID() != "" && !r.IsBusiness()
 	}})
 
-	res.IndexAttrs("AvatarPreview", "FullName", "NickName")
+	res.Order(aorm.IQ("{}.full_name ASC"))
+
+	res.SortableAttrs("FullName")
+	res.IndexAttrs(admin.BASIC_META_ICON, "FullName", "NickName", "Business")
 	res.EditAttrs("ID", res.ShowAttrs())
 	res.NewAttrs("FullName", "NickName", "Business")
 	res.SearchAttrs("FullName", "NickName")
 	res.CustomAttrs("display.tuple", "DisplayTupleID", "Stringify")
-	//res.MetaAliases
 
 	PeopleCallbacks.Run(res)
 }

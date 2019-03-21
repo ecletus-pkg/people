@@ -5,3 +5,37 @@ People:
   schemes:
     Individual: P. Física
     Business: P. Jurídica
+  form:
+    sections:
+      Basic Information: Informações Básicas
+      Adresses: Endereços
+  attributes:
+    Avatar: Foto
+    FullName: Nome Completo
+    NickName: Apelido
+    Business: Pessoa Jurídica
+    NationalIdentification: Doc. Iden. Nacional
+    Male: Sexo Masculino
+    Birthday: Aniversário
+    Phone: Número de Telefone
+    Mobile: Número do Celular
+    OtherPhones: Outros Números de Telefone
+    Mail: E-mail
+    OtherMails: Outros E-mails
+    MainAddress: Endereço Principal
+    OtherAdresses: Outros Endereços
+    Media: Arquivos
+    Notes: Notas
+  children:
+    OtherPhones*:
+      p: Outros Telefones
+      s: Outro Telefone
+    OtherMails*:
+      p: Outros E-mails
+      s: Outro E-mails
+    OtherAdresses*:
+      p: Outros Endereços
+      s: Outro Endereço
+    Media*:
+      p: Arquivos de Mídia
+      s: Arquivo de Mídia
