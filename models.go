@@ -4,14 +4,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aghape/media/oss"
+	"github.com/ecletus/media/oss"
 
-	"github.com/aghape-pkg/address"
-	"github.com/aghape-pkg/mail"
-	"github.com/aghape-pkg/phone"
-	"github.com/aghape/db/common/utils"
-	"github.com/aghape/fragment"
-	"github.com/aghape/validations"
+	"github.com/ecletus-pkg/address"
+	"github.com/ecletus-pkg/mail"
+	"github.com/ecletus-pkg/phone"
+	"github.com/ecletus/db/common/utils"
+	"github.com/ecletus/fragment"
+	"github.com/ecletus/validations"
 	"github.com/moisespsena-go/aorm"
 )
 

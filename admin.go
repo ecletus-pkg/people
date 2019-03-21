@@ -3,19 +3,19 @@ package people
 import (
 	"fmt"
 
-	"github.com/aghape/admin/admin_helpers"
+	"github.com/ecletus/admin/admin_helpers"
 
-	"github.com/aghape/media/oss"
+	"github.com/ecletus/media/oss"
 
-	"github.com/aghape-pkg/address"
-	"github.com/aghape-pkg/admin-tabs"
-	"github.com/aghape-pkg/mail"
-	"github.com/aghape-pkg/phone"
-	"github.com/aghape/admin"
-	"github.com/aghape/admin/resource_callback"
-	"github.com/aghape/core"
-	"github.com/aghape/db/common"
-	"github.com/aghape/media/media_library"
+	"github.com/ecletus-pkg/address"
+	"github.com/ecletus-pkg/admin-tabs"
+	"github.com/ecletus-pkg/mail"
+	"github.com/ecletus-pkg/phone"
+	"github.com/ecletus/admin"
+	"github.com/ecletus/admin/resource_callback"
+	"github.com/ecletus/core"
+	"github.com/ecletus/db/common"
+	"github.com/ecletus/media/media_library"
 	"github.com/moisespsena-go/aorm"
 )
 

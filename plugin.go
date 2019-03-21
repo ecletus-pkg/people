@@ -1,12 +1,12 @@
 package people
 
 import (
-	"github.com/aghape-pkg/address"
-	"github.com/aghape-pkg/mail"
-	"github.com/aghape-pkg/phone"
-	"github.com/aghape-pkg/admin"
-	"github.com/aghape/db"
-	"github.com/aghape/plug"
+	"github.com/ecletus-pkg/address"
+	"github.com/ecletus-pkg/mail"
+	"github.com/ecletus-pkg/phone"
+	"github.com/ecletus-pkg/admin"
+	"github.com/ecletus/db"
+	"github.com/ecletus/plug"
 )
 
 type Plugin struct {

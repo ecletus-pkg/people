@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/aghape/core"
-	"github.com/aghape/core/db"
-	"github.com/aghape/media/media_library"
-	"github.com/aghape/validations"
+	"github.com/ecletus/core"
+	"github.com/ecletus/core/db"
+	"github.com/ecletus/media/media_library"
+	"github.com/ecletus/validations"
 	"github.com/moisespsena-go/aorm"
 )
 

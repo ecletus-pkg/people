@@ -1,2 +1,2 @@
 # people
-People resources for Aghape Framework
+People resources for Ecletus Framework
