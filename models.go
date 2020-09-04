@@ -4,6 +4,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moisespsena-go/bid"
+
 	"github.com/ecletus/media/oss"
 
 	"github.com/ecletus-pkg/address"
@@ -21,36 +23,32 @@ const (
 	ICON_WOMAN    = "/images/icon-woman.png"
 )
 
-type PeopleGetter interface {
-	GetQorPeople() *People
-}
-
 type People struct {
 	aorm.AuditedSDModel
 	fragment.FragmentedModel
-	FullName               string `gorm:"size:255"`
-	NickName               string `gorm:"size:255"`
-	Business               bool
-	NationalIdentification string `gorm:"size:255"`
-	Male                   *bool
-	Birthday               time.Time
-	Avatar                 oss.Image `sql:"type:text" image:"crop:false"`
-	PhoneID                string    `gorm:"size:24"`
-	Phone                  phone.Phone
-	MobileID               string `gorm:"size:24"`
-	Mobile                 phone.Phone
-	OtherPhones            []PeoplePhone
-	MailID                 string `gorm:"size:24"`
-	Mail                   mail.Mail
-	OtherMails             []PeopleMail
-	MainAddressID          string `gorm:"size:24"`
-	MainAddress            address.Address
-	OtherAdresses          []PeopleAddress
-	Media                  []PeopleMedia `gorm:"foreignkey:PeopleID"`
-	Notes                  string        `gorm:"type:text"`
+	FullName      string `sql:"size:255"`
+	NickName      string `sql:"size:255"`
+	Business      bool   `sql:"not null"`
+	Doc           string `sql:"size:255;unique_index:={} IS NOT NULL AND {} <> ''"`
+	Male          *bool
+	Birthday      *time.Time `sql:"type:date"`
+	Avatar        oss.Image
+	PhoneID       bid.BID
+	Phone         *phone.Phone
+	MobileID      bid.BID
+	Mobile        *phone.Phone
+	OtherPhones   []Phone `aorm:"fkc"`
+	MailID        bid.BID
+	Mail          *mail.Mail
+	OtherMails    []Mail `aorm:"fkc"`
+	MainAddressID bid.BID
+	MainAddress   address.Address
+	OtherAdresses []Address `aorm:"fkc"`
+	Media         []Media `sql:"foreignkey:PeopleID;fkc"`
+	Notes         string  `sql:"type:text"`
 }
 
-func (People) GetGormInlinePreloadFields() []string {
+func (People) GetAormInlinePreloadFields() []string {
 	return []string{"FullName", "MainAddress"}
 }
 
@@ -80,21 +78,21 @@ func (p *People) Validate(db *aorm.DB) {
 	}
 }
 
-type PeoplePhone struct {
+type Phone struct {
 	phone.Phone
-	PeopleID string `gorm:"size:24"`
+	PeopleID bid.BID
 }
 
-type PeopleMail struct {
+type Mail struct {
 	mail.Mail
-	PeopleID string `gorm:"size:24"`
+	PeopleID bid.BID
 }
 
-type PeopleAddress struct {
+type Address struct {
 	address.Address
-	PeopleID string `gorm:"size:24"`
+	PeopleID bid.BID
 }
 
-func (pa *PeopleAddress) GetAddress() *address.Address {
+func (pa *Address) GetAddress() *address.Address {
 	return &pa.Address
 }

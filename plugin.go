@@ -25,7 +25,7 @@ func (p *Plugin) OnRegister(e *plug.Options) {
 	})
 
 	db.Events(p).DBOnMigrate(func(e *db.DBEvent) error {
-		return e.AutoMigrate(&PeopleMedia{}, &People{}, &PeoplePhone{}, &PeopleAddress{},
-			&PeopleMail{}).Error
+		return e.AutoMigrate(&Media{}, &People{}, &Phone{}, &Address{},
+			&Mail{}).Error
 	})
 }
